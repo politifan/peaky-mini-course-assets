@@ -1,0 +1,256 @@
+{
+  "environment": "Debian 13, real curl requests to public educational HTTP services; jq only selects relevant fields",
+  "captures": [
+    {
+      "course": "curl",
+      "id": "01-version",
+      "title": "curl и поддерживаемые протоколы",
+      "rows": [
+        {
+          "command": "curl --version",
+          "output": "curl 8.14.1 (x86_64-pc-linux-gnu) libcurl/8.14.1 OpenSSL/3.5.7 zlib/1.3.1 brotli/1.1.0 zstd/1.5.7 libidn2/2.3.8 libpsl/0.21.2 libssh2/1.11.1 nghttp2/1.64.0 nghttp3/1.8.0 librtmp/2.3 OpenLDAP/2.6.10\nRelease-Date: 2025-06-04, security patched: 8.14.1-2+deb13u5\nProtocols: dict file ftp ftps gopher gophers http https imap imaps ipfs ipns ldap ldaps mqtt pop3 pop3s rtmp rtsp scp sftp smb smbs smtp smtps telnet tftp ws wss\nFeatures: alt-svc AsynchDNS brotli GSS-API HSTS HTTP2 HTTP3 HTTPS-proxy IDN IPv6 Kerberos Largefile libz NTLM PSL SPNEGO SSL threadsafe TLS-SRP UnixSockets zstd\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "02-first",
+      "title": "Первое чтение JSON",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 https://jsonplaceholder.typicode.com/posts/1",
+          "output": "{\n  \"userId\": 1,\n  \"id\": 1,\n  \"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\n  \"body\": \"quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto\"\n}",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "03-save",
+      "title": "Сохраняем ответ, а не весь сеанс",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -o post.json https://jsonplaceholder.typicode.com/posts/1",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "wc -c post.json",
+          "output": "292 post.json\n",
+          "exit_code": 0
+        },
+        {
+          "command": "head -n 5 post.json",
+          "output": "{\n  \"userId\": 1,\n  \"id\": 1,\n  \"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\n  \"body\": \"quia et suscipit\\nsuscipit recusandae consequuntur expedita et cum\\nreprehenderit molestiae ut ut quas totam\\nnostrum rerum est autem sunt rem eveniet architecto\"\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "04-include",
+      "title": "Статус и заголовки вместе с телом",
+      "rows": [
+        {
+          "command": "curl -sS -i --max-time 20 https://httpbingo.org/status/200",
+          "output": "HTTP/2 200 \naccess-control-allow-credentials: true\naccess-control-allow-origin: *\ncontent-type: text/plain; charset=utf-8\ndate: Thu, 08 Oct 2026 15:33:57 GMT\ncontent-length: 0\nserver: Fly/75174e2d02 (2026-10-08)\nvia: 2 fly.io, 2 fly.io\nfly-request-id: 01M4E2CNKT5ZA6YYPMC2AWMFZ9-ams\n\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "05-head",
+      "title": "HEAD вместо чтения тела",
+      "rows": [
+        {
+          "command": "curl -sS -I --max-time 20 https://httpbingo.org/html",
+          "output": "HTTP/2 200 \naccess-control-allow-credentials: true\naccess-control-allow-origin: *\ncontent-type: text/html; charset=utf-8\ndate: Thu, 08 Oct 2026 15:33:57 GMT\nserver: Fly/75174e2d02 (2026-10-08)\nvia: 2 fly.io, 2 fly.io\nfly-request-id: 01M4E2CNZKH96JXV2PJR76KSS1-ams\n\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "06-redirect",
+      "title": "Переход нужно разрешить явно",
+      "rows": [
+        {
+          "command": "curl -sS -L -o /dev/null -w \"HTTP %{http_code}\\nURL %{url_effective}\\n\" --max-time 20 https://httpbingo.org/redirect/1",
+          "output": "HTTP 200\nURL https://httpbingo.org/get\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "07-query",
+      "title": "Кодируем пробел в параметре",
+      "rows": [
+        {
+          "command": "curl -sS -G --max-time 20 --data-urlencode \"topic=Git basics\" https://httpbingo.org/get | jq '{args,url}'",
+          "output": "{\n  \"args\": {\n    \"topic\": [\n      \"Git basics\"\n    ]\n  },\n  \"url\": \"https://httpbingo.org/get?topic=Git+basics\"\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "08-header",
+      "title": "Отправленный заголовок можно увидеть",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -H \"Accept: application/json\" -H \"X-Course: Peaky\" https://httpbingo.org/headers | jq '{accept:.headers.Accept,course:.headers[\"X-Course\"]}'",
+          "output": "{\n  \"accept\": [\n    \"application/json\"\n  ],\n  \"course\": [\n    \"Peaky\"\n  ]\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "09-json",
+      "title": "--json задаёт формат и POST",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 --json '{\"title\":\"My note\",\"done\":false}' https://httpbingo.org/post | jq '{method,json}'",
+          "output": "{\n  \"method\": \"POST\",\n  \"json\": {\n    \"done\": false,\n    \"title\": \"My note\"\n  }\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "10-form",
+      "title": "Форма — пары имя и значение",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 --data-urlencode \"topic=Git basics\" --data-urlencode \"level=first\" https://httpbingo.org/post | jq '{method,form}'",
+          "output": "{\n  \"method\": \"POST\",\n  \"form\": {\n    \"level\": [\n      \"first\"\n    ],\n    \"topic\": [\n      \"Git basics\"\n    ]\n  }\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "11-file-body",
+      "title": "Тело запроса из файла",
+      "rows": [
+        {
+          "command": "cat payload.json",
+          "output": "{\"title\":\"File payload\",\"done\":true}\n",
+          "exit_code": 0
+        },
+        {
+          "command": "curl -sS --max-time 20 --json @payload.json https://httpbingo.org/post | jq '{method,json}'",
+          "output": "{\n  \"method\": \"POST\",\n  \"json\": {\n    \"done\": true,\n    \"title\": \"File payload\"\n  }\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "12-put",
+      "title": "Выбираем PUT явно",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -X PUT --json '{\"id\":1,\"title\":\"New note\",\"done\":false}' https://httpbingo.org/put | jq '{method,json}'",
+          "output": "{\n  \"method\": \"PUT\",\n  \"json\": {\n    \"done\": false,\n    \"id\": 1,\n    \"title\": \"New note\"\n  }\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "13-patch",
+      "title": "Меняем только одну часть",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -X PATCH --json '{\"done\":true}' https://httpbingo.org/patch | jq '{method,json}'",
+          "output": "{\n  \"method\": \"PATCH\",\n  \"json\": {\n    \"done\": true\n  }\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "14-delete",
+      "title": "DELETE без выдуманного тела",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -X DELETE https://httpbingo.org/delete | jq '{method}'",
+          "output": "{\n  \"method\": \"DELETE\"\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "15-http-error",
+      "title": "HTTP 404 и код выхода curl",
+      "rows": [
+        {
+          "command": "curl -sS -o /dev/null -w \"HTTP %{http_code}\\n\" --max-time 20 https://httpbingo.org/status/404",
+          "output": "HTTP 404\n",
+          "exit_code": 0
+        },
+        {
+          "command": "curl -sS --fail-with-body -o /dev/null -w \"HTTP %{http_code}\\n\" --max-time 20 https://httpbingo.org/status/404",
+          "output": "curl: (22) The requested URL returned error: 404\nHTTP 404\n",
+          "exit_code": 22
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "16-timeout",
+      "title": "Общее время ограничено",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 1 https://httpbingo.org/delay/3",
+          "output": "curl: (28) Operation timed out after 1002 milliseconds with 0 bytes received\n",
+          "exit_code": 28
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "17-separate",
+      "title": "Заголовки и тело в разные файлы",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -D response.headers -o response.json https://httpbingo.org/json",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "head -n 6 response.headers",
+          "output": "HTTP/2 200 \naccess-control-allow-credentials: true\naccess-control-allow-origin: *\ncontent-type: application/json; charset=utf-8\ndate: Thu, 08 Oct 2026 15:34:03 GMT\ncontent-length: 421\n",
+          "exit_code": 0
+        },
+        {
+          "command": "head -n 8 response.json",
+          "output": "{\n  \"slideshow\": {\n    \"author\": \"Yours Truly\",\n    \"date\": \"date of publication\",\n    \"slides\": [\n      {\n        \"title\": \"Wake up to WonderWidgets!\",\n        \"type\": \"all\"\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "curl",
+      "id": "18-check",
+      "title": "Проверяем статус и содержимое",
+      "rows": [
+        {
+          "command": "curl -sS --fail-with-body --max-time 20 -o result.json -w \"HTTP %{http_code}\\n\" https://jsonplaceholder.typicode.com/posts/1",
+          "output": "HTTP 200\n",
+          "exit_code": 0
+        },
+        {
+          "command": "jq '{id,userId}' result.json",
+          "output": "{\n  \"id\": 1,\n  \"userId\": 1\n}\n",
+          "exit_code": 0
+        }
+      ]
+    }
+  ]
+}

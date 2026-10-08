@@ -1,0 +1,221 @@
+{
+  "environment": "Debian 13; live HTTPBingo and JSONPlaceholder; jq selects only the relevant real fields",
+  "captures": [
+    {
+      "course": "http",
+      "id": "01-body",
+      "title": "Тело ответа — это содержимое",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 https://httpbingo.org/html | head -n 12",
+          "output": "<!DOCTYPE html>\n<html>\n  <head>\n  </head>\n  <body>\n      <h1>Herman Melville - Moby-Dick</h1>\n\n      <div>\n        <p>\n          Availing himself of the mild, summer-cool weather that now reigned in these latitudes, and in preparation for the peculiarly active pursuits shortly to be anticipated, Perth, the begrimed, blistered old blacksmith, had not removed his portable forge to the hold again, after concluding his contributory work for Ahab's leg, but still retained it on deck, fast lashed to ringbolts by the foremast; being now almost incessantly invoked by the headsmen, and harpooneers, and bowsmen to do some little job for them; altering, or repairing, or new shaping their various weapons and boat furniture. Often he would be surrounded by an eager circle, all waiting to be served; holding boat-spades, pike-heads, harpoons, and lances, and jealously watching his every sooty movement, as he toiled. Nevertheless, this old man's was a patient hammer wielded by a patient arm. No murmur, no impatience, no petulance did come from him. Silent, slow, and solemn; bowing over still further his chronically broken back, he toiled away, as if toil were life itself, and the heavy beating of his hammer the heavy beating of his heart. And so it was.—Most miserable! A peculiar walk in this old man, a certain slight but painful appearing yawing in his gait, had at an early period of the voyage excited the curiosity of the mariners. And to the importunity of their persisted questionings he had finally given in; and so it came to pass that every one now knew the shameful story of his wretched fate. Belated, and not innocently, one bitter winter's midnight, on the road running between two country towns, the blacksmith half-stupidly felt the deadly numbness stealing over him, and sought refuge in a leaning, dilapidated barn. The issue was, the loss of the extremities of both feet. Out of this revelation, part by part, at last came out the four acts of the gladness, and the one long, and as yet uncatastrophied fifth act of the grief of his life's drama. He was an old man, who, at the age of nearly sixty, had postponedly encountered that thing in sorrow's technicals called ruin. He had been an artisan of famed excellence, and with plenty to do; owned a house and garden; embraced a youthful, daughter-like, loving wife, and three blithe, ruddy children; every Sunday went to a cheerful-looking church, planted in a grove. But one night, under cover of darkness, and further concealed in a most cunning disguisement, a desperate burglar slid into his happy home, and robbed them all of everything. And darker yet to tell, the blacksmith himself did ignorantly conduct this burglar into his family's heart. It was the Bottle Conjuror! Upon the opening of that fatal cork, forth flew the fiend, and shrivelled up his home. Now, for prudent, most wise, and economic reasons, the blacksmith's shop was in the basement of his dwelling, but with a separate entrance to it; so that always had the young and loving healthy wife listened with no unhappy nervousness, but with vigorous pleasure, to the stout ringing of her young-armed old husband's hammer; whose reverberations, muffled by passing through the floors and walls, came up to her, not unsweetly, in her nursery; and so, to stout Labor's iron lullaby, the blacksmith's infants were rocked to slumber. Oh, woe on woe! Oh, Death, why canst thou not sometimes be timely? Hadst thou taken this old blacksmith to thyself ere his full ruin came upon him, then had the young widow had a delicious grief, and her orphans a truly venerable, legendary sire to dream of in their after years; and all of them a care-killing competency.\n        </p>\n      </div>\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "02-headers",
+      "title": "Заголовки отдельно от тела",
+      "rows": [
+        {
+          "command": "curl -sS -I --max-time 20 https://httpbingo.org/html",
+          "output": "HTTP/2 200 \naccess-control-allow-credentials: true\naccess-control-allow-origin: *\ncontent-type: text/html; charset=utf-8\ndate: Thu, 08 Oct 2026 15:31:44 GMT\nserver: Fly/75174e2d02 (2026-10-08)\nvia: 2 fly.io, 2 fly.io\nfly-request-id: 01M4E28MEQMWK1Y0WGGSZW6TB3-ams\n\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "03-raw",
+      "title": "Метод и путь в полученном запросе",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 \"https://httpbingo.org/dump/request?topic=git\"",
+          "output": "GET /dump/request?topic=git HTTP/1.1\nHost: httpbingo.org\nAccept: */*\nFly-Client-Ip: 178.155.74.159\nFly-Forwarded-Port: 443\nFly-Forwarded-Proto: https\nFly-Forwarded-Ssl: on\nFly-Region: ams\nFly-Request-Id: 01M4E28MT7WHHNYQKRW2BJVT0P-ams\nFly-Traceparent: 00-76c823c607243277a2e132ee37713198-fde412b01df2c9c3-00\nFly-Tracestate: \nUser-Agent: curl/8.14.1\nVia: 2 fly.io, 2 fly.io\nX-Forwarded-For: 178.155.74.159, 66.241.125.232\nX-Forwarded-Port: 443\nX-Forwarded-Proto: https\nX-Forwarded-Ssl: on\nX-Request-Start: t=1791473505095724\n\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "04-query",
+      "title": "Параметр относится к URL",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 \"https://httpbingo.org/get?topic=git&page=2\" | jq '{args,method,url}'",
+          "output": "{\n  \"args\": {\n    \"page\": [\n      \"2\"\n    ],\n    \"topic\": [\n      \"git\"\n    ]\n  },\n  \"method\": \"GET\",\n  \"url\": \"https://httpbingo.org/get?topic=git&page=2\"\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "05-status",
+      "title": "404 — ответ сервера",
+      "rows": [
+        {
+          "command": "curl -sS -o /dev/null -w \"HTTP %{http_code}\\n\" --max-time 20 https://httpbingo.org/status/404",
+          "output": "HTTP 404\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "06-classes",
+      "title": "Успех и ошибка сервера",
+      "rows": [
+        {
+          "command": "curl -sS -o /dev/null -w \"HTTP %{http_code}\\n\" --max-time 20 https://httpbingo.org/status/201\ncurl -sS -o /dev/null -w \"HTTP %{http_code}\\n\" --max-time 20 https://httpbingo.org/status/503",
+          "output": "HTTP 201\nHTTP 503\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "07-custom",
+      "title": "Заголовок передаёт дополнительную информацию",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -H \"X-Course: Peaky\" https://httpbingo.org/headers | jq '{course:.headers[\"X-Course\"]}'",
+          "output": "{\n  \"course\": [\n    \"Peaky\"\n  ]\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "08-post",
+      "title": "POST с JSON-телом",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -H \"Content-Type: application/json\" -d '{\"title\":\"Learning HTTP\"}' https://httpbingo.org/post | jq '{method,json}'",
+          "output": "{\n  \"method\": \"POST\",\n  \"json\": {\n    \"title\": \"Learning HTTP\"\n  }\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "09-form",
+      "title": "Форма и JSON — разные форматы",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -d \"topic=git&level=first\" https://httpbingo.org/post | jq '{method,form,json}'",
+          "output": "{\n  \"method\": \"POST\",\n  \"form\": {\n    \"level\": [\n      \"first\"\n    ],\n    \"topic\": [\n      \"git\"\n    ]\n  },\n  \"json\": null\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "10-put",
+      "title": "PUT: передаём представление целиком",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -X PUT -H \"Content-Type: application/json\" -d '{\"id\":1,\"title\":\"New title\",\"done\":false}' https://httpbingo.org/put | jq '{method,json}'",
+          "output": "{\n  \"method\": \"PUT\",\n  \"json\": {\n    \"done\": false,\n    \"id\": 1,\n    \"title\": \"New title\"\n  }\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "11-patch",
+      "title": "PATCH: частичное изменение",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -X PATCH -H \"Content-Type: application/json\" -d '{\"done\":true}' https://httpbingo.org/patch | jq '{method,json}'",
+          "output": "{\n  \"method\": \"PATCH\",\n  \"json\": {\n    \"done\": true\n  }\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "12-delete",
+      "title": "DELETE: метод виден в ответе",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -X DELETE https://httpbingo.org/delete | jq '{method}'",
+          "output": "{\n  \"method\": \"DELETE\"\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "13-redirect",
+      "title": "302 и адрес следующего запроса",
+      "rows": [
+        {
+          "command": "curl -sS -I --max-time 20 https://httpbingo.org/redirect/1",
+          "output": "HTTP/2 302 \naccess-control-allow-credentials: true\naccess-control-allow-origin: *\nlocation: /get\ndate: Thu, 08 Oct 2026 15:31:49 GMT\nserver: Fly/75174e2d02 (2026-10-08)\nvia: 2 fly.io, 2 fly.io\nfly-request-id: 01M4E28RVE957QHCT9HYG4TS6T-ams\n\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "14-follow",
+      "title": "После перехода меняется конечный URL",
+      "rows": [
+        {
+          "command": "curl -sS -L -o /dev/null -w \"HTTP %{http_code}\\nURL %{url_effective}\\n\" --max-time 20 https://httpbingo.org/redirect/1",
+          "output": "HTTP 200\nURL https://httpbingo.org/get\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "15-cache",
+      "title": "ETag и условный запрос",
+      "rows": [
+        {
+          "command": "curl -sS -I --max-time 20 https://httpbingo.org/etag/peaky-v1\ncurl -sS -I --max-time 20 -H 'If-None-Match: \"peaky-v1\"' https://httpbingo.org/etag/peaky-v1",
+          "output": "HTTP/2 200 \naccept-ranges: bytes\naccess-control-allow-credentials: true\naccess-control-allow-origin: *\ncontent-length: 572\ncontent-type: text/plain; charset=utf-8\netag: \"peaky-v1\"\nlast-modified: Thu, 08 Oct 2026 15:31:50 GMT\ndate: Thu, 08 Oct 2026 15:31:50 GMT\nserver: Fly/75174e2d02 (2026-10-08)\nvia: 2 fly.io, 2 fly.io\nfly-request-id: 01M4E28SRB81MVA9WCBK45W2FY-ams\n\nHTTP/2 304 \naccess-control-allow-credentials: true\naccess-control-allow-origin: *\netag: \"peaky-v1\"\ndate: Thu, 08 Oct 2026 15:31:50 GMT\nserver: Fly/75174e2d02 (2026-10-08)\nvia: 2 fly.io, 2 fly.io\nfly-request-id: 01M4E28T3W4EHX0ABXP0DBEX4P-ams\n\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "16-api",
+      "title": "Читаем настоящее учебное API",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 https://jsonplaceholder.typicode.com/posts/1 | jq '{id,userId,title}'",
+          "output": "{\n  \"id\": 1,\n  \"userId\": 1,\n  \"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\"\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "17-demo-write",
+      "title": "Создание в демонстрационном API",
+      "rows": [
+        {
+          "command": "curl -sS --max-time 20 -H \"Content-Type: application/json\" -d '{\"title\":\"Peaky practice\",\"body\":\"A demo\",\"userId\":1}' https://jsonplaceholder.typicode.com/posts | jq '{id,title,userId}'",
+          "output": "{\n  \"id\": 101,\n  \"title\": \"Peaky practice\",\n  \"userId\": 1\n}\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "http",
+      "id": "18-not-persistent",
+      "title": "Успешный POST не доказывает постоянное хранение",
+      "rows": [
+        {
+          "command": "curl -sS -o /dev/null -w \"HTTP %{http_code}\\n\" --max-time 20 https://jsonplaceholder.typicode.com/posts/101",
+          "output": "HTTP 404\n",
+          "exit_code": 0
+        }
+      ]
+    }
+  ]
+}

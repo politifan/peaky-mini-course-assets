@@ -1,0 +1,337 @@
+{
+  "environment": "Debian 13, Docker Compose v2; isolated nginx and Redis project",
+  "compose": "services:\n  web:\n    image: nginx:1.28-alpine\n    ports:\n      - \"127.0.0.1:18782:80\"\n  cache:\n    image: redis:7.4-alpine\n    command: [\"redis-server\", \"--appendonly\", \"yes\"]\n    volumes:\n      - cache-data:/data\nvolumes:\n  cache-data:\n",
+  "captures": [
+    {
+      "course": "compose",
+      "id": "01-file",
+      "title": "Описываем два сервиса",
+      "rows": [
+        {
+          "command": "docker compose version",
+          "output": "Docker Compose version 2.26.1-4\n",
+          "exit_code": 0
+        },
+        {
+          "command": "cat compose.yaml",
+          "output": "services:\n  web:\n    image: nginx:1.28-alpine\n    ports:\n      - \"127.0.0.1:18782:80\"\n  cache:\n    image: redis:7.4-alpine\n    command: [\"redis-server\", \"--appendonly\", \"yes\"]\n    volumes:\n      - cache-data:/data\nvolumes:\n  cache-data:\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "02-config",
+      "title": "Проверяем итоговую конфигурацию",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose config --services",
+          "output": "cache\nweb\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose config --quiet",
+          "output": "",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "03-up",
+      "title": "Проект запускается одной командой",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose up -d",
+          "output": " Network peaky-mini-compose_default  Creating\n Network peaky-mini-compose_default  Created\n Volume \"peaky-mini-compose_cache-data\"  Creating\n Volume \"peaky-mini-compose_cache-data\"  Created\n Container peaky-mini-compose-cache-1  Creating\n Container peaky-mini-compose-web-1  Creating\n Container peaky-mini-compose-cache-1  Created\n Container peaky-mini-compose-web-1  Created\n Container peaky-mini-compose-cache-1  Starting\n Container peaky-mini-compose-web-1  Starting\n Container peaky-mini-compose-web-1  Started\n Container peaky-mini-compose-cache-1  Started\n",
+          "exit_code": 0
+        },
+        {
+          "command": "sleep 2",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose ps",
+          "output": "NAME                         IMAGE               COMMAND                  SERVICE   CREATED         STATUS         PORTS\npeaky-mini-compose-cache-1   redis:7.4-alpine    \"docker-entrypoint.s…\"   cache     7 seconds ago   Up 2 seconds   6379/tcp\npeaky-mini-compose-web-1     nginx:1.28-alpine   \"/docker-entrypoint.…\"   web       7 seconds ago   Up 2 seconds   127.0.0.1:18782->80/tcp\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "04-repeat",
+      "title": "Повторный up не создаёт другой проект",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose up -d",
+          "output": " Container peaky-mini-compose-web-1  Running\n Container peaky-mini-compose-cache-1  Running\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose ps --services",
+          "output": "cache\nweb\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "05-http",
+      "title": "Наружный порт только у web",
+      "rows": [
+        {
+          "command": "curl -sS -I http://127.0.0.1:18782",
+          "output": "HTTP/1.1 200 OK\nServer: nginx/1.28.3\nDate: Thu, 08 Oct 2026 15:27:13 GMT\nContent-Type: text/html\nContent-Length: 615\nLast-Modified: Tue, 24 Mar 2026 19:45:11 GMT\nConnection: keep-alive\nETag: \"69c2e9c7-267\"\nAccept-Ranges: bytes\n\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose port web 80",
+          "output": "127.0.0.1:18782\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "06-stop",
+      "title": "stop и start сохраняют контейнеры",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose stop",
+          "output": " Container peaky-mini-compose-cache-1  Stopping\n Container peaky-mini-compose-web-1  Stopping\n Container peaky-mini-compose-cache-1  Stopped\n Container peaky-mini-compose-web-1  Stopped\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose ps -a",
+          "output": "NAME                         IMAGE               COMMAND                  SERVICE   CREATED          STATUS                    PORTS\npeaky-mini-compose-cache-1   redis:7.4-alpine    \"docker-entrypoint.s…\"   cache     10 seconds ago   Exited (0) 1 second ago   \npeaky-mini-compose-web-1     nginx:1.28-alpine   \"/docker-entrypoint.…\"   web       10 seconds ago   Up 5 seconds              127.0.0.1:18782->80/tcp\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose start",
+          "output": " Container peaky-mini-compose-web-1  Starting\n Container peaky-mini-compose-cache-1  Starting\n Container peaky-mini-compose-web-1  Started\n Container peaky-mini-compose-cache-1  Started\n",
+          "exit_code": 0
+        },
+        {
+          "command": "sleep 1",
+          "output": "",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "07-network",
+      "title": "Имя сервиса внутри сети",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose exec -T web sh -c \"getent hosts cache\"",
+          "output": "172.24.0.3        cache  cache\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose exec -T cache redis-cli PING",
+          "output": "PONG\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "08-hostname",
+      "title": "Сервис не становится именем на хосте",
+      "rows": [
+        {
+          "command": "curl -sS --noproxy \"*\" --connect-timeout 2 http://web",
+          "output": "curl: (28) Resolving timed out after 2000 milliseconds\n",
+          "exit_code": 28
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose exec -T web wget -qO- http://web | head -n 3",
+          "output": "<!DOCTYPE html>\n<html>\n<head>\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "09-data",
+      "title": "Записываем и читаем учебный ключ",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose exec -T cache redis-cli SET course:note Keep-me",
+          "output": "OK\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose exec -T cache redis-cli GET course:note",
+          "output": "Keep-me\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "10-logs",
+      "title": "Логи одного сервиса",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose logs --tail 5 cache",
+          "output": "\u001b[2Kcache-1  | 1:M 08 Oct 2026 15:27:18.889 * Done loading RDB, keys loaded: 0, keys expired: 0.\n\u001b[2Kcache-1  | 1:M 08 Oct 2026 15:27:18.890 * DB loaded from base file appendonly.aof.1.base.rdb: 0.048 seconds\n\u001b[2Kcache-1  | 1:M 08 Oct 2026 15:27:18.890 * DB loaded from append only file: 0.048 seconds\n\u001b[2Kcache-1  | 1:M 08 Oct 2026 15:27:18.890 * Opening AOF incr file appendonly.aof.1.incr.aof on server start\n\u001b[2Kcache-1  | 1:M 08 Oct 2026 15:27:18.890 * Ready to accept connections tcp\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "11-exec-name",
+      "title": "Нужно имя сервиса из файла",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose exec -T database redis-cli PING",
+          "output": "service \"database\" is not running\n",
+          "exit_code": 1
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose config --services",
+          "output": "cache\nweb\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "12-yaml-error",
+      "title": "Ошибка отступа обнаруживается до запуска",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose -f broken.yaml config --quiet",
+          "output": "yaml: line 4: mapping values are not allowed in this context\n",
+          "exit_code": 15
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "13-environment",
+      "title": "Подстановка не равна переменной контейнера",
+      "rows": [
+        {
+          "command": "cat .env",
+          "output": "COURSE_PORT=18782\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose config | grep -A 7 ports:",
+          "output": "    ports:\n      - mode: ingress\n        host_ip: 127.0.0.1\n        target: 80\n        published: \"18782\"\n        protocol: tcp\nnetworks:\n  default:\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose exec -T web sh -c \"printenv COURSE_PORT || true\"",
+          "output": "",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "14-volume",
+      "title": "Том переживает удаление контейнеров",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose down",
+          "output": " Container peaky-mini-compose-web-1  Stopping\n Container peaky-mini-compose-cache-1  Stopping\n Container peaky-mini-compose-web-1  Stopped\n Container peaky-mini-compose-web-1  Removing\n Container peaky-mini-compose-cache-1  Stopped\n Container peaky-mini-compose-cache-1  Removing\n Container peaky-mini-compose-cache-1  Removed\n Container peaky-mini-compose-web-1  Removed\n Network peaky-mini-compose_default  Removing\n Network peaky-mini-compose_default  Removed\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose up -d",
+          "output": " Network peaky-mini-compose_default  Creating\n Network peaky-mini-compose_default  Created\n Container peaky-mini-compose-web-1  Creating\n Container peaky-mini-compose-cache-1  Creating\n Container peaky-mini-compose-web-1  Created\n Container peaky-mini-compose-cache-1  Created\n Container peaky-mini-compose-cache-1  Starting\n Container peaky-mini-compose-web-1  Starting\n Container peaky-mini-compose-web-1  Started\n Container peaky-mini-compose-cache-1  Started\n",
+          "exit_code": 0
+        },
+        {
+          "command": "sleep 2",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose exec -T cache redis-cli GET course:note",
+          "output": "Keep-me\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "15-recreate",
+      "title": "Пересоздание сервиса и сохранённый ключ",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose up -d --force-recreate cache",
+          "output": " Container peaky-mini-compose-cache-1  Recreate\n Container peaky-mini-compose-cache-1  Recreated\n Container peaky-mini-compose-cache-1  Starting\n Container peaky-mini-compose-cache-1  Started\n",
+          "exit_code": 0
+        },
+        {
+          "command": "sleep 2",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose exec -T cache redis-cli GET course:note",
+          "output": "Keep-me\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "16-project",
+      "title": "Имена проектов изолируют набор ресурсов",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose ps --format json",
+          "output": "{\"Command\":\"\\\"docker-entrypoint.s…\\\"\",\"CreatedAt\":\"2026-10-08 15:29:14 +0000 UTC\",\"ExitCode\":0,\"Health\":\"\",\"ID\":\"a8f4137302d7\",\"Image\":\"redis:7.4-alpine\",\"Labels\":\"com.docker.compose.config-hash=cb39e76bfd40201eca4b4c1d9c7bd1079e94594ef175c2b959a1b12f61aee77d,com.docker.compose.depends_on=,com.docker.compose.project.config_files=/home/debian/peaky-mini-series-20261008/compose/compose.yaml,com.docker.compose.replace=eda58465eb7ad4e47f6195f55734bb4884d04d6418685dd8fdfdf39d37f33146,com.docker.compose.service=cache,com.docker.compose.version=2.26.1,com.docker.compose.container-number=1,com.docker.compose.image=sha256:f84b0c4678011602b9b98c227a4dcd5468bf8b088b02fdd4165cb7758bad8058,com.docker.compose.oneoff=False,com.docker.compose.project=peaky-mini-compose,com.docker.compose.project.working_dir=/home/debian/peaky-mini-series-20261008/compose\",\"LocalVolumes\":\"1\",\"Mounts\":\"peaky-mini-com…\",\"Name\":\"peaky-mini-compose-cache-1\",\"Names\":\"peaky-mini-compose-cache-1\",\"Networks\":\"peaky-mini-compose_default\",\"Ports\":\"6379/tcp\",\"Project\":\"peaky-mini-compose\",\"Publishers\":[{\"URL\":\"\",\"TargetPort\":6379,\"PublishedPort\":0,\"Protocol\":\"tcp\"}],\"RunningFor\":\"7 seconds ago\",\"Service\":\"cache\",\"Size\":\"0B\",\"State\":\"running\",\"Status\":\"Up 2 seconds\"}\n{\"Command\":\"\\\"/docker-entrypoint.…\\\"\",\"CreatedAt\":\"2026-10-08 15:29:08 +0000 UTC\",\"ExitCode\":0,\"Health\":\"\",\"ID\":\"24e847b05ded\",\"Image\":\"nginx:1.28-alpine\",\"Labels\":\"com.docker.compose.depends_on=,com.docker.compose.oneoff=False,com.docker.compose.project=peaky-mini-compose,com.docker.compose.project.config_files=/home/debian/peaky-mini-series-20261008/compose/compose.yaml,com.docker.compose.project.working_dir=/home/debian/peaky-mini-series-20261008/compose,com.docker.compose.service=web,com.docker.compose.version=2.26.1,com.docker.compose.container-number=1,com.docker.compose.image=sha256:dc73b49f5124cf2ee538dfbdfbd121f0b4ccdcb20fea30f3a81bd477c02e2bb5,maintainer=NGINX Docker Maintainers \\u003cdocker-maint@nginx.com\\u003e,com.docker.compose.config-hash=90af7ec2b703bd7f7a1b7737348ed657bf1f6faf79f687f718d7a7b3943c0b0c\",\"LocalVolumes\":\"0\",\"Mounts\":\"\",\"Name\":\"peaky-mini-compose-web-1\",\"Names\":\"peaky-mini-compose-web-1\",\"Networks\":\"peaky-mini-compose_default\",\"Ports\":\"127.0.0.1:18782-\\u003e80/tcp\",\"Project\":\"peaky-mini-compose\",\"Publishers\":[{\"URL\":\"127.0.0.1\",\"TargetPort\":80,\"PublishedPort\":18782,\"Protocol\":\"tcp\"}],\"RunningFor\":\"13 seconds ago\",\"Service\":\"web\",\"Size\":\"0B\",\"State\":\"running\",\"Status\":\"Up 9 seconds\"}\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker compose -p peaky-mini-compose config --volumes",
+          "output": "cache-data\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "17-check",
+      "title": "Запущен не означает работает",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose exec -T cache redis-cli PING",
+          "output": "PONG\n",
+          "exit_code": 0
+        },
+        {
+          "command": "curl -sS -o /dev/null -w \"%{http_code}\\n\" http://127.0.0.1:18782",
+          "output": "200\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "compose",
+      "id": "18-finish",
+      "title": "Останавливаем только учебный проект",
+      "rows": [
+        {
+          "command": "docker compose -p peaky-mini-compose down",
+          "output": " Container peaky-mini-compose-cache-1  Stopping\n Container peaky-mini-compose-web-1  Stopping\n Container peaky-mini-compose-cache-1  Stopped\n Container peaky-mini-compose-cache-1  Removing\n Container peaky-mini-compose-web-1  Stopped\n Container peaky-mini-compose-web-1  Removing\n Container peaky-mini-compose-cache-1  Removed\n Container peaky-mini-compose-web-1  Removed\n Network peaky-mini-compose_default  Removing\n Network peaky-mini-compose_default  Removed\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker volume ls --filter name=peaky-mini-compose --format \"{{.Name}}\"",
+          "output": "peaky-mini-compose_cache-data\n",
+          "exit_code": 0
+        }
+      ]
+    }
+  ]
+}

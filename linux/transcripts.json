@@ -1,0 +1,476 @@
+{
+  "environment": "Debian 13, real command sessions",
+  "captures": [
+    {
+      "course": "linux",
+      "id": "01-location",
+      "title": "Где выполняется команда",
+      "rows": [
+        {
+          "command": "pwd",
+          "output": "/home/debian/peaky-mini-series-20261008/linux\n",
+          "exit_code": 0
+        },
+        {
+          "command": "whoami",
+          "output": "debian\n",
+          "exit_code": 0
+        },
+        {
+          "command": "uname -s",
+          "output": "Linux\n",
+          "exit_code": 0
+        },
+        {
+          "command": "mkdir work",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "ls",
+          "output": "work\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "02-list",
+      "title": "Обычные и скрытые имена",
+      "rows": [
+        {
+          "command": "printf 'First note\\n' > work/note.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "printf 'Local setting\\n' > work/.settings",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "ls work",
+          "output": "note.txt\n",
+          "exit_code": 0
+        },
+        {
+          "command": "ls -a work",
+          "output": ".\n..\n.settings\nnote.txt\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "03-paths",
+      "title": "Относительный путь и родитель",
+      "rows": [
+        {
+          "command": "pwd",
+          "output": "/home/debian/peaky-mini-series-20261008/linux\n",
+          "exit_code": 0
+        },
+        {
+          "command": "cd work && pwd",
+          "output": "/home/debian/peaky-mini-series-20261008/linux/work\n",
+          "exit_code": 0
+        },
+        {
+          "command": "cd work && ls .",
+          "output": "note.txt\n",
+          "exit_code": 0
+        },
+        {
+          "command": "cd work && ls ..",
+          "output": "work\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "04-mkdir",
+      "title": "Вложенные папки и повторный вызов",
+      "rows": [
+        {
+          "command": "mkdir -p work/reports/2026",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "mkdir -p work/reports/2026",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "mkdir work",
+          "output": "mkdir: cannot create directory 'work': File exists\n",
+          "exit_code": 1
+        },
+        {
+          "command": "find work -type d",
+          "output": "work\nwork/reports\nwork/reports/2026\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "05-copy",
+      "title": "Копия и оригинал",
+      "rows": [
+        {
+          "command": "cp work/note.txt work/copy.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "printf 'Second note\\n' >> work/copy.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "cat work/note.txt",
+          "output": "First note\n",
+          "exit_code": 0
+        },
+        {
+          "command": "cat work/copy.txt",
+          "output": "First note\nSecond note\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "06-move",
+      "title": "Перемещение и пробелы",
+      "rows": [
+        {
+          "command": "mv work/copy.txt work/reports/copy.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "printf 'Meeting\\n' > 'work/meeting notes.txt'",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "cat work/meeting notes.txt",
+          "output": "cat: work/meeting: No such file or directory\ncat: notes.txt: No such file or directory\n",
+          "exit_code": 1
+        },
+        {
+          "command": "cat 'work/meeting notes.txt'",
+          "output": "Meeting\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "07-missing",
+      "title": "Ошибку нужно читать с пути",
+      "rows": [
+        {
+          "command": "cat work/not.txt",
+          "output": "cat: work/not.txt: No such file or directory\n",
+          "exit_code": 1
+        },
+        {
+          "command": "ls work",
+          "output": "meeting notes.txt\nnote.txt\nreports\n",
+          "exit_code": 0
+        },
+        {
+          "command": "cat work/note.txt",
+          "output": "First note\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "08-remove",
+      "title": "Файл и непустая папка",
+      "rows": [
+        {
+          "command": "cp work/note.txt work/disposable.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "rm work/disposable.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "rm work/reports",
+          "output": "rm: cannot remove 'work/reports': Is a directory\n",
+          "exit_code": 1
+        },
+        {
+          "command": "rmdir work/reports",
+          "output": "rmdir: failed to remove 'work/reports': Directory not empty\n",
+          "exit_code": 1
+        },
+        {
+          "command": "ls work/reports",
+          "output": "2026\ncopy.txt\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "09-text",
+      "title": "Перенаправление заменяет или дописывает",
+      "rows": [
+        {
+          "command": "printf 'alpha\\nbeta\\n' > work/lines.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "printf 'gamma\\n' >> work/lines.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "cat work/lines.txt",
+          "output": "alpha\nbeta\ngamma\n",
+          "exit_code": 0
+        },
+        {
+          "command": "wc -l work/lines.txt",
+          "output": "3 work/lines.txt\n",
+          "exit_code": 0
+        },
+        {
+          "command": "head -n 2 work/lines.txt",
+          "output": "alpha\nbeta\n",
+          "exit_code": 0
+        },
+        {
+          "command": "tail -n 1 work/lines.txt",
+          "output": "gamma\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "10-grep",
+      "title": "Совпадение и отсутствие результата",
+      "rows": [
+        {
+          "command": "grep -n 'beta' work/lines.txt",
+          "output": "2:beta\n",
+          "exit_code": 0
+        },
+        {
+          "command": "grep -n 'delta' work/lines.txt",
+          "output": "",
+          "exit_code": 1
+        },
+        {
+          "command": "grep -i 'ALPHA' work/lines.txt",
+          "output": "alpha\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "11-pipe",
+      "title": "Поток между командами",
+      "rows": [
+        {
+          "command": "printf 'red\\nblue\\nred\\n' > work/colors.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "sort work/colors.txt",
+          "output": "blue\nred\nred\n",
+          "exit_code": 0
+        },
+        {
+          "command": "sort work/colors.txt | uniq",
+          "output": "blue\nred\n",
+          "exit_code": 0
+        },
+        {
+          "command": "sort work/colors.txt | uniq -c",
+          "output": "      1 blue\n      2 red\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "12-find",
+      "title": "Поиск пути и поиск текста",
+      "rows": [
+        {
+          "command": "find work -type f -name '*.txt'",
+          "output": "work/note.txt\nwork/lines.txt\nwork/reports/copy.txt\nwork/colors.txt\nwork/meeting notes.txt\n",
+          "exit_code": 0
+        },
+        {
+          "command": "grep -R -n 'First' work",
+          "output": "work/note.txt:1:First note\nwork/reports/copy.txt:1:First note\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "13-permissions",
+      "title": "Право чтения и отказ",
+      "rows": [
+        {
+          "command": "cp work/note.txt work/private.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "chmod u-r work/private.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "ls -l work/private.txt",
+          "output": "--w-rw-r-- 1 debian debian 11 Oct  8 15:20 work/private.txt\n",
+          "exit_code": 0
+        },
+        {
+          "command": "cat work/private.txt",
+          "output": "cat: work/private.txt: Permission denied\n",
+          "exit_code": 1
+        },
+        {
+          "command": "chmod u+r work/private.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "cat work/private.txt",
+          "output": "First note\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "14-executable",
+      "title": "Скрипт и право исполнения",
+      "rows": [
+        {
+          "command": "printf '#!/bin/sh\\nprintf \"Ready\\\\n\"\\n' > work/ready.sh",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "work/ready.sh",
+          "output": "bash: line 1: work/ready.sh: Permission denied\n",
+          "exit_code": 126
+        },
+        {
+          "command": "chmod u+x work/ready.sh",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "work/ready.sh",
+          "output": "Ready\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "15-process",
+      "title": "Свой процесс и его PID",
+      "rows": [
+        {
+          "command": "sleep 60 & task_pid=$!\nps -p \"$task_pid\" -o pid,comm\nkill \"$task_pid\"\nwait \"$task_pid\"\ntrue",
+          "output": "    PID COMMAND\n3735352 sleep\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "16-glob",
+      "title": "Шаблон раскрывает оболочка",
+      "rows": [
+        {
+          "command": "printf \"%s\\n\" work/*.txt",
+          "output": "work/colors.txt\nwork/lines.txt\nwork/meeting notes.txt\nwork/note.txt\nwork/private.txt\n",
+          "exit_code": 0
+        },
+        {
+          "command": "printf \"%s\\n\" \"work/*.txt\"",
+          "output": "work/*.txt\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "17-errors-stream",
+      "title": "Вывод и диагностика в разные файлы",
+      "rows": [
+        {
+          "command": "cat work/note.txt work/absent.txt > work/output.txt 2> work/error.txt\ntrue",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "cat work/output.txt",
+          "output": "First note\n",
+          "exit_code": 0
+        },
+        {
+          "command": "cat work/error.txt",
+          "output": "cat: work/absent.txt: No such file or directory\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "linux",
+      "id": "18-result",
+      "title": "Самостоятельная папка",
+      "rows": [
+        {
+          "command": "mkdir -p work/practice/archive",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "cp work/lines.txt work/practice/source.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "mv work/practice/source.txt work/practice/archive/source.txt",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "find work/practice -type f",
+          "output": "work/practice/archive/source.txt\n",
+          "exit_code": 0
+        },
+        {
+          "command": "wc -l work/practice/archive/source.txt",
+          "output": "3 work/practice/archive/source.txt\n",
+          "exit_code": 0
+        }
+      ]
+    }
+  ]
+}

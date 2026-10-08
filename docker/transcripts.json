@@ -1,0 +1,391 @@
+{
+  "environment": "Debian 13, Docker engine 26; real isolated containers",
+  "captures": [
+    {
+      "course": "docker",
+      "id": "01-version",
+      "title": "Клиент и сервер Docker",
+      "rows": [
+        {
+          "command": "docker version --format \"Client {{.Client.Version}} / Server {{.Server.Version}}\"",
+          "output": "Client 26.1.5+dfsg1 / Server 26.1.5+dfsg1\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker image ls nginx:1.28-alpine",
+          "output": "REPOSITORY   TAG           IMAGE ID       CREATED        SIZE\nnginx        1.28-alpine   dc73b49f5124   6 months ago   62.1MB\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "02-run",
+      "title": "Один запуск, один контейнер",
+      "rows": [
+        {
+          "command": "docker run --name peaky-mini-hello busybox:1.37 echo \"Hello from a container\"",
+          "output": "Hello from a container\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker ps -a --filter name=peaky-mini-hello --format \"{{.Names}} {{.Status}}\"",
+          "output": "peaky-mini-hello Up 1 second\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "03-restart",
+      "title": "Запускаем тот же контейнер",
+      "rows": [
+        {
+          "command": "docker start -a peaky-mini-hello",
+          "output": "Hello from a container\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker ps -a --filter name=peaky-mini-hello --format \"{{.Names}} {{.Status}}\"",
+          "output": "peaky-mini-hello Up 1 second\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker rm peaky-mini-hello",
+          "output": "peaky-mini-hello\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "04-web",
+      "title": "Фоновый веб-сервер",
+      "rows": [
+        {
+          "command": "docker run -d --name peaky-mini-web -p 127.0.0.1:18780:80 nginx:1.28-alpine",
+          "output": "035f62d6ce9202259c6b6443fd8191e5fc766b0ea30dfcd46553778998401687\n",
+          "exit_code": 0
+        },
+        {
+          "command": "sleep 1",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "docker ps --filter name=peaky-mini-web --format \"{{.Names}} {{.Ports}}\"",
+          "output": "peaky-mini-web 127.0.0.1:18780->80/tcp\n",
+          "exit_code": 0
+        },
+        {
+          "command": "curl -sS -I http://127.0.0.1:18780",
+          "output": "HTTP/1.1 200 OK\nServer: nginx/1.28.3\nDate: Thu, 08 Oct 2026 15:23:05 GMT\nContent-Type: text/html\nContent-Length: 615\nLast-Modified: Tue, 24 Mar 2026 19:45:11 GMT\nConnection: keep-alive\nETag: \"69c2e9c7-267\"\nAccept-Ranges: bytes\n\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "05-name-error",
+      "title": "Имя уже занято",
+      "rows": [
+        {
+          "command": "docker run --name peaky-mini-web busybox:1.37 echo Hello",
+          "output": "docker: Error response from daemon: Conflict. The container name \"/peaky-mini-web\" is already in use by container \"035f62d6ce9202259c6b6443fd8191e5fc766b0ea30dfcd46553778998401687\". You have to remove (or rename) that container to be able to reuse that name.\nSee 'docker run --help'.\n",
+          "exit_code": 125
+        },
+        {
+          "command": "docker ps -a --filter name=peaky-mini-web --format \"{{.Names}} {{.Status}}\"",
+          "output": "peaky-mini-web Up 1 second\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "06-stop",
+      "title": "Stopped не значит удалён",
+      "rows": [
+        {
+          "command": "docker stop peaky-mini-web",
+          "output": "peaky-mini-web\n",
+          "exit_code": 0
+        },
+        {
+          "command": "curl -sS --connect-timeout 2 http://127.0.0.1:18780",
+          "output": "curl: (7) Failed to connect to 127.0.0.1 port 18780 after 0 ms: Could not connect to server\n",
+          "exit_code": 7
+        },
+        {
+          "command": "docker ps -a --filter name=peaky-mini-web --format \"{{.Names}} {{.Status}}\"",
+          "output": "peaky-mini-web Up 3 seconds\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker start peaky-mini-web",
+          "output": "peaky-mini-web\n",
+          "exit_code": 0
+        },
+        {
+          "command": "sleep 1",
+          "output": "",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "07-port-conflict",
+      "title": "Порт хоста уже занят",
+      "rows": [
+        {
+          "command": "docker run -d --name peaky-mini-conflict -p 127.0.0.1:18780:80 nginx:1.28-alpine",
+          "output": "789a825d5d68cedb78fc7ac783bb9b4134d145c73fc62c3d7148fa070708f00e\ndocker: Error response from daemon: driver failed programming external connectivity on endpoint peaky-mini-conflict (25b9fe0e4b53e796ca85ba3fc7dcb1fefdebe93cb3bb2d7f86941c054c8af986): Bind for 127.0.0.1:18780 failed: port is already allocated.\n",
+          "exit_code": 125
+        },
+        {
+          "command": "docker ps -a --filter name=peaky-mini-conflict --format \"{{.Names}} {{.Status}}\"",
+          "output": "peaky-mini-conflict Created\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker rm peaky-mini-conflict",
+          "output": "peaky-mini-conflict\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "08-port-inspect",
+      "title": "Снаружи 18780, внутри 80",
+      "rows": [
+        {
+          "command": "docker port peaky-mini-web",
+          "output": "80/tcp -> 127.0.0.1:18780\n",
+          "exit_code": 0
+        },
+        {
+          "command": "curl -sS -o /dev/null -w \"%{http_code}\\n\" http://127.0.0.1:18780",
+          "output": "200\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "09-log",
+      "title": "Логи и успешный ответ",
+      "rows": [
+        {
+          "command": "curl -sS -o /dev/null http://127.0.0.1:18780/course-check",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "docker logs --tail 6 peaky-mini-web",
+          "output": "2026/10/08 15:23:08 [notice] 1#1: start worker process 31\n2026/10/08 15:23:08 [notice] 1#1: start worker process 32\n2026/10/08 15:23:08 [notice] 1#1: start worker process 33\n172.17.0.1 - - [08/Oct/2026:15:23:12 +0000] \"GET / HTTP/1.1\" 200 615 \"-\" \"curl/8.14.1\" \"-\"\n2026/10/08 15:23:12 [error] 23#23: *2 open() \"/usr/share/nginx/html/course-check\" failed (2: No such file or directory), client: 172.17.0.1, server: localhost, request: \"GET /course-check HTTP/1.1\", host: \"127.0.0.1:18780\"\n172.17.0.1 - - [08/Oct/2026:15:23:12 +0000] \"GET /course-check HTTP/1.1\" 404 153 \"-\" \"curl/8.14.1\" \"-\"\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "10-exec",
+      "title": "Команда внутри контейнера",
+      "rows": [
+        {
+          "command": "docker exec peaky-mini-web sh -c \"printf Container:; hostname\"",
+          "output": "Container:035f62d6ce92\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker exec peaky-mini-web cat /etc/alpine-release",
+          "output": "3.23.3\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "11-layer",
+      "title": "Файл переживает restart",
+      "rows": [
+        {
+          "command": "docker exec peaky-mini-web sh -c \"echo draft > /tmp/course-note.txt\"",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "docker restart peaky-mini-web",
+          "output": "peaky-mini-web\n",
+          "exit_code": 0
+        },
+        {
+          "command": "sleep 1",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "docker exec peaky-mini-web cat /tmp/course-note.txt",
+          "output": "draft\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "12-recreate",
+      "title": "Новый контейнер не наследует файл",
+      "rows": [
+        {
+          "command": "docker stop peaky-mini-web",
+          "output": "peaky-mini-web\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker rm peaky-mini-web",
+          "output": "peaky-mini-web\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker run -d --name peaky-mini-web -p 127.0.0.1:18780:80 nginx:1.28-alpine",
+          "output": "03ed3a5a79a8f182ca32e1c8109aeacee98091b47ecac524498983f8bcb4c720\n",
+          "exit_code": 0
+        },
+        {
+          "command": "sleep 1",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "docker exec peaky-mini-web cat /tmp/course-note.txt",
+          "output": "cat: can't open '/tmp/course-note.txt': No such file or directory\n",
+          "exit_code": 1
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "13-build",
+      "title": "Свой образ из Dockerfile",
+      "rows": [
+        {
+          "command": "cat Dockerfile",
+          "output": "FROM nginx:1.28-alpine\nCOPY index.html /usr/share/nginx/html/index.html\n",
+          "exit_code": 0
+        },
+        {
+          "command": "cat .dockerignore",
+          "output": "scratch.txt\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker build -t peaky-mini-page:1 .",
+          "output": "#0 building with \"default\" instance using docker driver\n\n#1 [internal] load build definition from Dockerfile\n#1 transferring dockerfile:\n#1 transferring dockerfile: 109B 0.0s done\n#1 DONE 0.8s\n\n#2 [internal] load metadata for docker.io/library/nginx:1.28-alpine\n#2 DONE 0.0s\n\n#3 [internal] load .dockerignore\n#3 transferring context:\n#3 transferring context: 52B done\n#3 DONE 0.7s\n\n#4 [1/2] FROM docker.io/library/nginx:1.28-alpine\n#4 ...\n\n#5 [internal] load build context\n#5 transferring context: 139B done\n#5 DONE 2.0s\n\n#4 [1/2] FROM docker.io/library/nginx:1.28-alpine\n#4 DONE 4.6s\n\n#6 [2/2] COPY index.html /usr/share/nginx/html/index.html\n#6 DONE 1.0s\n\n#7 exporting to image\n#7 exporting layers\n#7 exporting layers 0.9s done\n#7 writing image sha256:be0ad5fce48483dd658f7532b2ef298ec6d6ea728485f126e975f6d07cf42c16 0.0s done\n#7 naming to docker.io/library/peaky-mini-page:1 0.1s done\n#7 DONE 1.5s\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "14-image",
+      "title": "Контейнер из своего образа",
+      "rows": [
+        {
+          "command": "docker run -d --name peaky-mini-page -p 127.0.0.1:18781:80 peaky-mini-page:1",
+          "output": "f2fc9129e89eb1a0f6b6c8f94eef6af17a9ca0aeaf4064fd46901af99874eed6\n",
+          "exit_code": 0
+        },
+        {
+          "command": "sleep 1",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "curl -sS http://127.0.0.1:18781",
+          "output": "<!doctype html><html lang=\"ru\"><meta charset=\"utf-8\"><h1>Peaky Docker</h1><p>My first image</p></html>",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "15-volume",
+      "title": "Том сохраняет данные между контейнерами",
+      "rows": [
+        {
+          "command": "docker volume create peaky-mini-notes",
+          "output": "peaky-mini-notes\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker run --rm -v peaky-mini-notes:/notes busybox:1.37 sh -c \"echo Keep-me > /notes/note.txt\"",
+          "output": "",
+          "exit_code": 0
+        },
+        {
+          "command": "docker run --rm -v peaky-mini-notes:/notes busybox:1.37 cat /notes/note.txt",
+          "output": "Keep-me\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "16-readonly",
+      "title": "Bind mount только для чтения",
+      "rows": [
+        {
+          "command": "docker run --rm -v \"$PWD/index.html:/page.html:ro\" busybox:1.37 cat /page.html",
+          "output": "<!doctype html><html lang=\"ru\"><meta charset=\"utf-8\"><h1>Peaky Docker</h1><p>My first image</p></html>",
+          "exit_code": 0
+        },
+        {
+          "command": "docker run --rm -v \"$PWD/index.html:/page.html:ro\" busybox:1.37 sh -c \"echo changed > /page.html\"",
+          "output": "sh: can't create /page.html: Read-only file system\n",
+          "exit_code": 1
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "17-exit",
+      "title": "Код завершения важнее наличия вывода",
+      "rows": [
+        {
+          "command": "docker run --rm busybox:1.37 sh -c \"echo Failed-check; exit 3\"",
+          "output": "Failed-check\n",
+          "exit_code": 3
+        },
+        {
+          "command": "docker run --rm busybox:1.37 sh -c \"echo Passed-check; exit 0\"",
+          "output": "Passed-check\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "docker",
+      "id": "18-cleanup",
+      "title": "Удаляем только свои учебные контейнеры",
+      "rows": [
+        {
+          "command": "docker stop peaky-mini-web peaky-mini-page",
+          "output": "peaky-mini-web\npeaky-mini-page\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker rm peaky-mini-web peaky-mini-page",
+          "output": "peaky-mini-web\npeaky-mini-page\n",
+          "exit_code": 0
+        },
+        {
+          "command": "docker run --rm -v peaky-mini-notes:/notes busybox:1.37 cat /notes/note.txt",
+          "output": "Keep-me\n",
+          "exit_code": 0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,222 @@
+{
+  "environment": "Debian 13, SQLite 3.46.1 2024-08-13 09:16:08 c9c2ab54ba1f5f46360f1b4f35d849cd3f080e6fc2b6c60e91b16c63f69aalt1 (64-bit)",
+  "schema": "CREATE TABLE authors(id INTEGER PRIMARY KEY, name TEXT NOT NULL);\nCREATE TABLE books(id INTEGER PRIMARY KEY, title TEXT NOT NULL, author_id INTEGER, price INTEGER, stock INTEGER NOT NULL);\nINSERT INTO authors VALUES (1,'Anna'),(2,'Boris'),(3,'Vera');\nINSERT INTO books VALUES (1,'Linux notes',1,400,3),(2,'Docker diary',2,600,0),(3,'Git pocket',1,250,5),(4,'Web basics',NULL,NULL,2),(5,'SQL practice',2,600,1);\n",
+  "captures": [
+    {
+      "course": "sql",
+      "id": "01-table",
+      "title": "Начинаем с таблицы",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT * FROM books ORDER BY id;'",
+          "output": "id  title         author_id  price  stock\n--  ------------  ---------  -----  -----\n1   Linux notes   1          400    3    \n2   Docker diary  2          600    0    \n3   Git pocket    1          250    5    \n4   Web basics                      2    \n5   SQL practice  2          600    1    \n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "02-columns",
+      "title": "Выбираем нужные столбцы",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT title, price FROM books ORDER BY id;'",
+          "output": "title         price\n------------  -----\nLinux notes   400  \nDocker diary  600  \nGit pocket    250  \nWeb basics         \nSQL practice  600  \n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "03-alias",
+      "title": "Понятное имя результата",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT title, price * stock AS total_value FROM books ORDER BY id;'",
+          "output": "title         total_value\n------------  -----------\nLinux notes   1200       \nDocker diary  0          \nGit pocket    1250       \nWeb basics               \nSQL practice  600        \n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "04-filter",
+      "title": "Условие для каждой строки",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT title, stock FROM books WHERE stock > 0 ORDER BY id;'",
+          "output": "title         stock\n------------  -----\nLinux notes   3    \nGit pocket    5    \nWeb basics    2    \nSQL practice  1    \n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "05-and",
+      "title": "Два условия одновременно",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT title, price, stock FROM books WHERE price <= 400 AND stock > 0 ORDER BY id;'",
+          "output": "title        price  stock\n-----------  -----  -----\nLinux notes  400    3    \nGit pocket   250    5    \n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "06-null",
+      "title": "NULL не равен NULL",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT title FROM books WHERE price = NULL;\nSELECT title FROM books WHERE price IS NULL;'",
+          "output": "title     \n----------\nWeb basics\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "07-or",
+      "title": "Скобки объясняют намерение",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT title, stock FROM books WHERE (author_id = 1 OR author_id = 2) AND stock > 0 ORDER BY id;'",
+          "output": "title         stock\n------------  -----\nLinux notes   3    \nGit pocket    5    \nSQL practice  1    \n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "08-order",
+      "title": "Убывание и разрешение ничьей",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT title, price FROM books WHERE price IS NOT NULL ORDER BY price DESC, id ASC;'",
+          "output": "title         price\n------------  -----\nDocker diary  600  \nSQL practice  600  \nLinux notes   400  \nGit pocket    250  \n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "09-limit",
+      "title": "Две строки после сортировки",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT title, price FROM books WHERE price IS NOT NULL ORDER BY price DESC, id ASC LIMIT 2;'",
+          "output": "title         price\n------------  -----\nDocker diary  600  \nSQL practice  600  \n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "10-like",
+      "title": "Поиск по фрагменту",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT title FROM books WHERE title LIKE '\"'\"'%notes%'\"'\"';'",
+          "output": "title      \n-----------\nLinux notes\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "11-count",
+      "title": "COUNT(*) и COUNT(price)",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT COUNT(*) AS all_rows, COUNT(price) AS priced_rows FROM books;'",
+          "output": "all_rows  priced_rows\n--------  -----------\n5         4          \n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "12-group",
+      "title": "Одна строка на группу",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT author_id, COUNT(*) AS book_count, SUM(stock) AS copies FROM books GROUP BY author_id ORDER BY author_id;'",
+          "output": "author_id  book_count  copies\n---------  ----------  ------\n           1           2     \n1          2           8     \n2          2           1     \n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "13-having",
+      "title": "Условие для группы",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT author_id, COUNT(*) AS book_count FROM books WHERE author_id IS NOT NULL GROUP BY author_id HAVING COUNT(*) >= 2 ORDER BY author_id;'",
+          "output": "author_id  book_count\n---------  ----------\n1          2         \n2          2         \n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "14-join",
+      "title": "Сопоставляем книгу и автора",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT b.title, a.name FROM books AS b JOIN authors AS a ON b.author_id = a.id ORDER BY b.id;'",
+          "output": "title         name \n------------  -----\nLinux notes   Anna \nDocker diary  Boris\nGit pocket    Anna \nSQL practice  Boris\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "15-left",
+      "title": "Не теряем книгу без автора",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT b.title, a.name FROM books AS b LEFT JOIN authors AS a ON b.author_id = a.id ORDER BY b.id;'",
+          "output": "title         name \n------------  -----\nLinux notes   Anna \nDocker diary  Boris\nGit pocket    Anna \nWeb basics         \nSQL practice  Boris\n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "16-fanout",
+      "title": "После JOIN строк может стать больше",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT a.name, b.title FROM authors AS a LEFT JOIN books AS b ON b.author_id = a.id ORDER BY a.id, b.id;'",
+          "output": "name   title       \n-----  ------------\nAnna   Linux notes \nAnna   Git pocket  \nBoris  Docker diary\nBoris  SQL practice\nVera               \n",
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "17-error",
+      "title": "Опечатка в столбце",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT titel FROM books;'",
+          "output": "Error: in prepare, no such column: titel\n  SELECT titel FROM books;\n         ^--- error here\n",
+          "exit_code": 1
+        }
+      ]
+    },
+    {
+      "course": "sql",
+      "id": "18-answer",
+      "title": "Рабочий вопрос: дорогие книги в наличии",
+      "rows": [
+        {
+          "command": "sqlite3 -header -column library.db 'SELECT b.title, a.name, b.price FROM books AS b LEFT JOIN authors AS a ON b.author_id = a.id WHERE b.stock > 0 AND b.price >= 400 ORDER BY b.price DESC, b.id;'",
+          "output": "title         name   price\n------------  -----  -----\nSQL practice  Boris  600  \nLinux notes   Anna   400  \n",
+          "exit_code": 0
+        }
+      ]
+    }
+  ]
+}
